@@ -17,8 +17,8 @@
 		</div>
 		<div id="app-settings-content">
 			<div>
-				<span><input class="checkbox" id="showhiddenfiles" checked="checked" type="checkbox">
-					<label for="showhiddenfiles"></label></span>
+				<span><input class="checkbox" id="showhiddenfilesToggle" checked="checked" type="checkbox">
+					<label for="showhiddenfilesToggle"></label></span>
 				<span><?php p($l->t('Show hidden files')); ?></span>
 			</div>
 			<label for="webdavurl"><?php p($l->t('WebDAV'));?></label>

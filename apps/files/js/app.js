@@ -41,13 +41,22 @@
 		fileList: null,
 
 		/**
+		 * Backbone model for storing files preferences
+		 */
+		_filesConfig: null,
+
+		/**
 		 * Initializes the files app
 		 */
 		initialize: function() {
 			this.navigation = new OCA.Files.Navigation($('#app-navigation'));
+			this.$showHiddenFiles = $('input#showhiddenfilesToggle');
 			var showHidden = $('#showHiddenFiles').val() === "1";
-			this.$showHiddenFiles = $('input#showhiddenfiles');
 			this.$showHiddenFiles.prop('checked', showHidden);
+
+			this._filesConfig = new OC.Backbone.Model({
+				showhidden: showHidden
+			});
 
 			var urlParams = OC.Util.History.parseUrlQuery();
 			var fileActions = new OCA.Files.FileActions();
@@ -80,7 +89,7 @@
 						mode: $('#defaultFileSorting').val(),
 						direction: $('#defaultFileSortingDirection').val()
 					},
-					showHiddenFiles: showHidden
+					config: this._filesConfig,
 				}
 			);
 			this.files.initialize();
@@ -150,6 +159,14 @@
 		},
 
 		/**
+		 *
+		 * @returns {Backbone.Model}
+		 */
+		getFilesConfig: function() {
+			return this._filesConfig;
+		},
+
+		/**
 		 * Setup events based on URL changes
 		 */
 		_setupEvents: function() {
@@ -170,7 +187,7 @@
 		 */
 		_onShowHiddenFilesChange: function() {
 			var show = this.$showHiddenFiles.is(':checked');
-			this.fileList.setShowHiddenFiles(show);
+			this._filesConfig.set('showhidden', show);
 			this._debouncedPersistShowHiddenFilesState();
 		},
 
@@ -180,7 +197,7 @@
 		 * @returns {undefined}
 		 */
 		_persistShowHiddenFilesState: function() {
-			var show = this.$showHiddenFiles.is(':checked');
+			var show = this._filesConfig.get('showhidden');
 			$.post(OC.generateUrl('/apps/files/api/v1/showhidden'), {
 				show: show
 			});

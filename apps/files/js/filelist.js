@@ -145,6 +145,11 @@
 		_filter: '',
 
 		/**
+		 * @type Backbone.Model
+		 */
+		_filesConfig: null,
+
+		/**
 		 * Sort attribute
 		 * @type String
 		 */
@@ -161,11 +166,6 @@
 		 * @type Function
 		 */
 		_sortComparator: null,
-
-		/**
-		 * Show/hide dot-files
-		 */
-		_showHiddenFiles: true,
 
 		/**
 		 * Whether to do a client side sort.
@@ -202,6 +202,15 @@
 			if (this.initialized) {
 				return;
 			}
+
+			if (options.config) {
+				this._filesConfig = options.config;
+			} else {
+				this._filesConfig = OCA.Files.App.getFilesConfig();
+			}
+			this._filesConfig.on('change:showhidden', function() {
+				self.setFiles(self.allFiles);
+			});
 
 			if (options.dragOptions) {
 				this._dragOptions = options.dragOptions;
@@ -299,10 +308,6 @@
 				this.$fileList.one('updated', function() {
 					self.scrollTo(options.scrollTo);
 				});
-			}
-
-			if (!_.isUndefined(options.showHiddenFiles)) {
-				this._showHiddenFiles = options.showHiddenFiles;
 			}
 
 			OC.Plugins.attach('OCA.Files.FileList', this);
@@ -804,7 +809,7 @@
 		 * @since 8.2
 		 */
 		findFile: function(fileName) {
-			return _.find(this.files, function(aFile) {
+			return _.find(this.allFiles, function(aFile) {
 				return (aFile.name === fileName);
 			}) || null;
 		},
@@ -924,15 +929,6 @@
 
 		},
 
-		setShowHiddenFiles: function(show) {
-			if (show === this._showHiddenFiles) {
-				return;
-			}
-
-			this._showHiddenFiles = show;
-			this.setFiles(this.allFiles);
-		},
-
 		/**
 		 * Sets the files to be displayed in the list.
 		 * This operation will re-render the list and update the summary.
@@ -976,7 +972,7 @@
 		 * @returns {array}
 		 */
 		_filterHiddenFiles: function(files) {
-			if (this._showHiddenFiles) {
+			if (this._filesConfig.get('showhidden')) {
 				return files;
 			}
 			return _.filter(files, function(file) {
